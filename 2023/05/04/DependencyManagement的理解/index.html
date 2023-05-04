@@ -16,21 +16,21 @@
   <meta name="author" content="linchen">
   <meta name="keywords" content="">
   
-    <meta property="og:type" content="article">
-<meta property="og:title" content="测试文章2">
-<meta property="og:url" content="http://example.com/2023/05/03/%E6%B5%8B%E8%AF%95%E6%96%87%E7%AB%A02/index.html">
+    <meta name="description" content="DependencyManagement的理解与遇到的问题理解在Maven中 元素是用于管理依赖项的重要部分之一，它提供了一种集中式的方式来指定项目的依赖项及其版本号，以确保所有的子模块都使用相同的依赖版本或灵活地自定义依赖版本。  示例说明： 在父模块中： 123456789&lt;dependencyManagement&gt;        &lt;dependencies&gt;">
+<meta property="og:type" content="article">
+<meta property="og:title" content="linchen">
+<meta property="og:url" content="http://example.com/2023/05/04/DependencyManagement%E7%9A%84%E7%90%86%E8%A7%A3/index.html">
 <meta property="og:site_name" content="linchen">
+<meta property="og:description" content="DependencyManagement的理解与遇到的问题理解在Maven中 元素是用于管理依赖项的重要部分之一，它提供了一种集中式的方式来指定项目的依赖项及其版本号，以确保所有的子模块都使用相同的依赖版本或灵活地自定义依赖版本。  示例说明： 在父模块中： 123456789&lt;dependencyManagement&gt;        &lt;dependencies&gt;">
 <meta property="og:locale" content="en_US">
-<meta property="og:image" content="http://example.com/2023/05/03/%E6%B5%8B%E8%AF%95%E6%96%87%E7%AB%A02/test.jpg">
-<meta property="article:published_time" content="2023-05-03T14:27:36.000Z">
-<meta property="article:modified_time" content="2023-05-03T15:02:02.444Z">
+<meta property="article:published_time" content="2023-05-04T12:19:17.899Z">
+<meta property="article:modified_time" content="2023-05-04T13:23:04.031Z">
 <meta property="article:author" content="linchen">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:image" content="http://example.com/2023/05/03/%E6%B5%8B%E8%AF%95%E6%96%87%E7%AB%A02/test.jpg">
   
   
   
-  <title>测试文章2 - linchen</title>
+  <title>linchen</title>
 
   <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
 
@@ -196,7 +196,7 @@
       <div class="banner-text text-center fade-in-up">
         <div class="h2">
           
-            <span id="subtitle" data-typed-text="测试文章2"></span>
+            <span id="subtitle" data-typed-text=""></span>
           
         </div>
 
@@ -207,8 +207,8 @@
     
       <span class="post-meta">
         <i class="iconfont icon-date-fill" aria-hidden="true"></i>
-        <time datetime="2023-05-03 22:27" pubdate>
-          May 3, 2023 pm
+        <time datetime="2023-05-04 20:19" pubdate>
+          May 4, 2023 pm
         </time>
       </span>
     
@@ -219,7 +219,7 @@
       <span class="post-meta mr-2">
         <i class="iconfont icon-chart"></i>
         
-          0 words
+          1.6k words
         
       </span>
     
@@ -230,7 +230,7 @@
         
         
         
-          1 mins
+          14 mins
         
       </span>
     
@@ -268,12 +268,32 @@
         <div id="board">
           <article class="post-content mx-auto">
             <!-- SEO header -->
-            <h1 style="display: none">测试文章2</h1>
+            <h1 style="display: none"></h1>
             
             
               <div class="markdown-body">
                 
-                <img src="/2023/05/03/%E6%B5%8B%E8%AF%95%E6%96%87%E7%AB%A02/test.jpg" srcset="/img/loading.gif" lazyload class="">
+                <h1 id="DependencyManagement的理解与遇到的问题"><a href="#DependencyManagement的理解与遇到的问题" class="headerlink" title="DependencyManagement的理解与遇到的问题"></a>DependencyManagement的理解与遇到的问题</h1><h2 id="理解"><a href="#理解" class="headerlink" title="理解"></a>理解</h2><p>在Maven中 <dependencyManagement>元素是用于管理依赖项的重要部分之一，它提供了一种集中式的方式来指定项目的依赖项及其版本号，以确保所有的子模块都使用相同的依赖版本或灵活地自定义依赖版本。 </p>
+<p>示例说明：</p>
+<p>在父模块中：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs xml"><span class="hljs-tag">&lt;<span class="hljs-name">dependencyManagement</span>&gt;</span><br>        <span class="hljs-tag">&lt;<span class="hljs-name">dependencies</span>&gt;</span><br>            <span class="hljs-tag">&lt;<span class="hljs-name">dependency</span>&gt;</span><br>                <span class="hljs-tag">&lt;<span class="hljs-name">groupId</span>&gt;</span>com.baomidou<span class="hljs-tag">&lt;/<span class="hljs-name">groupId</span>&gt;</span><br>                <span class="hljs-tag">&lt;<span class="hljs-name">artifactId</span>&gt;</span>mybatis-plus-boot-starter<span class="hljs-tag">&lt;/<span class="hljs-name">artifactId</span>&gt;</span><br>                <span class="hljs-tag">&lt;<span class="hljs-name">version</span>&gt;</span>3.0.5<span class="hljs-tag">&lt;/<span class="hljs-name">version</span>&gt;</span><br>            <span class="hljs-tag">&lt;/<span class="hljs-name">dependency</span>&gt;</span><br>        <span class="hljs-tag">&lt;/<span class="hljs-name">dependencies</span>&gt;</span><br><span class="hljs-tag">&lt;/<span class="hljs-name">dependencyManagement</span>&gt;</span><br></code></pre></td></tr></table></figure>
+
+<p>那么在子模块中只需要<groupId>和<artifactId>即可，如：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs xml"><span class="hljs-tag">&lt;<span class="hljs-name">dependency</span>&gt;</span><br>    <span class="hljs-tag">&lt;<span class="hljs-name">groupId</span>&gt;</span>com.baomidou<span class="hljs-tag">&lt;/<span class="hljs-name">groupId</span>&gt;</span><br>    <span class="hljs-tag">&lt;<span class="hljs-name">artifactId</span>&gt;</span>mybatis-plus-boot-starter<span class="hljs-tag">&lt;/<span class="hljs-name">artifactId</span>&gt;</span><br><span class="hljs-tag">&lt;/<span class="hljs-name">dependency</span>&gt;</span><br></code></pre></td></tr></table></figure>
+
+<p><dependencyManagement>元素的作用可以简单总结为：</p>
+<ol>
+<li>集中管理依赖版本：将所有子模块所需的依赖项及其版本定义在一个地方，确保所有子模块使用相同的依赖版本，避免版本冲突问题；当需要变更版本号的时候只需要在父类容器里更新，不需要任何一个子项目的修改；如果某个子项目需要另外一个特殊的版本号时，只需要在自己的模块dependencies中声明一个版本号即可。子类就会使用子类声明的版本号，不继承于父类版本号。</li>
+<li>简化pom.xml文件：将一些通用的依赖项和版本号定义在<dependencyManagement>元素中，可以减少pom.xml文件的冗余信息，使其更易于维护和阅读；</li>
+<li>提高项目的可维护性和稳定性：通过统一管理依赖版本，可以降低项目的维护成本，提高项目的稳定性和可维护性。</li>
+</ol>
+<h2 id="遇到的问题"><a href="#遇到的问题" class="headerlink" title="遇到的问题"></a>遇到的问题</h2><h3 id="需求"><a href="#需求" class="headerlink" title="需求"></a>需求</h3><p>​        在原有的项目中继承baskreport报表生成工具，要实现在原项目中登录操作后进入baskreport界面不需要再次进行登录操作的单点登录功能。</p>
+<p>​        步骤：在父工程的dependencyManagement中添加完整依赖</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><code class="hljs xml"><span class="hljs-tag">&lt;<span class="hljs-name">dependency</span>&gt;</span><br>    <span class="hljs-tag">&lt;<span class="hljs-name">groupId</span>&gt;</span>com.basksoft.report<span class="hljs-tag">&lt;/<span class="hljs-name">groupId</span>&gt;</span><br>    <span class="hljs-tag">&lt;<span class="hljs-name">artifactId</span>&gt;</span>baskreport-font<span class="hljs-tag">&lt;/<span class="hljs-name">artifactId</span>&gt;</span><br>    <span class="hljs-tag">&lt;<span class="hljs-name">version</span>&gt;</span>$&#123;baskreport-font.version&#125;<span class="hljs-tag">&lt;/<span class="hljs-name">version</span>&gt;</span><br><span class="hljs-tag">&lt;/<span class="hljs-name">dependency</span>&gt;</span><br><span class="hljs-tag">&lt;<span class="hljs-name">dependency</span>&gt;</span><br>    <span class="hljs-tag">&lt;<span class="hljs-name">groupId</span>&gt;</span>com.basksoft.report<span class="hljs-tag">&lt;/<span class="hljs-name">groupId</span>&gt;</span><br>    <span class="hljs-tag">&lt;<span class="hljs-name">artifactId</span>&gt;</span>baskreport-designer<span class="hljs-tag">&lt;/<span class="hljs-name">artifactId</span>&gt;</span><br>    <span class="hljs-tag">&lt;<span class="hljs-name">version</span>&gt;</span>$&#123;baskreport-designer.version&#125;<span class="hljs-tag">&lt;/<span class="hljs-name">version</span>&gt;</span><br><span class="hljs-tag">&lt;/<span class="hljs-name">dependency</span>&gt;</span><br></code></pre></td></tr></table></figure>
+
+<p>​        随后在子模块中直接引入，刷新maven依赖，依赖成功引入，此时运行项目报错！lombok依赖找不到了！尝试在子模块中依赖的模块中引入，报错swagger依赖找不到！此后进行了一系列清除缓存、重新加载依赖，重启项目的操作都没有作用，真的是吐血了…….最后将父模块中的上述代码删掉，改为直接在子模块中引入完整依赖，刷新maven，运行，项目启动成功！！！</p>
+<p>​        在网上查找没有找到相似的经验贴，只能初步判定应该是依赖版本冲突的问题，个人也还没有理解其中的原因。</p>
+
                 
               </div>
             
@@ -290,8 +310,8 @@
 
   <div class="license-box my-3">
     <div class="license-title">
-      <div>测试文章2</div>
-      <div>http://example.com/2023/05/03/测试文章2/</div>
+      <div></div>
+      <div>http://example.com/2023/05/04/DependencyManagement的理解/</div>
     </div>
     <div class="license-meta">
       
@@ -303,7 +323,7 @@
       
         <div class="license-meta-item license-meta-date">
           <div>Posted on</div>
-          <div>May 3, 2023</div>
+          <div>May 4, 2023</div>
         </div>
       
       
@@ -339,8 +359,8 @@
                   <article class="post-next col-6">
                     
                     
-                      <a href="/2023/05/03/%E6%B5%8B%E8%AF%95%E6%96%87%E7%AB%A0/" title="测试文章">
-                        <span class="hidden-mobile">测试文章</span>
+                      <a href="/2023/05/03/hello-world/" title="Hello World">
+                        <span class="hidden-mobile">Hello World</span>
                         <span class="visible-mobile">Next</span>
                         <i class="iconfont icon-arrowright"></i>
                       </a>
