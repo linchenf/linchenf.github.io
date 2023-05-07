@@ -18,23 +18,23 @@
   
     <meta name="description" content="目标利用docker&#x2F;docker-comose工具完成至少3种不同动态语言（PHP&#x2F;Java&#x2F;Python&#x2F;Go&#x2F;Perl&#x2F;Nodejs…）运行环境的搭建，并实现从mysql&#x2F;mongodb等数据库中读取数据到Web页面中显示   前置条件：要求已经安装好docker、docker-compose环境，并且准备好一个可以使用的数据库。 python篇 创建一个名为 python-demo-tes">
 <meta property="og:type" content="article">
-<meta property="og:title" content="docker部署python运行环境实战">
-<meta property="og:url" content="http://example.com/2023/05/07/docker%E9%83%A8%E7%BD%B2python%E8%BF%90%E8%A1%8C%E7%8E%AF%E5%A2%83%E5%AE%9E%E6%88%98/index.html">
+<meta property="og:title" content="docker实战">
+<meta property="og:url" content="http://example.com/2023/05/07/docker%E5%AE%9E%E6%88%98/index.html">
 <meta property="og:site_name" content="linchen">
 <meta property="og:description" content="目标利用docker&#x2F;docker-comose工具完成至少3种不同动态语言（PHP&#x2F;Java&#x2F;Python&#x2F;Go&#x2F;Perl&#x2F;Nodejs…）运行环境的搭建，并实现从mysql&#x2F;mongodb等数据库中读取数据到Web页面中显示   前置条件：要求已经安装好docker、docker-compose环境，并且准备好一个可以使用的数据库。 python篇 创建一个名为 python-demo-tes">
 <meta property="og:locale" content="en_US">
-<meta property="og:image" content="http://example.com/2023/05/07/docker%E9%83%A8%E7%BD%B2python%E8%BF%90%E8%A1%8C%E7%8E%AF%E5%A2%83%E5%AE%9E%E6%88%98/1.png">
-<meta property="og:image" content="http://example.com/2023/05/07/docker%E9%83%A8%E7%BD%B2python%E8%BF%90%E8%A1%8C%E7%8E%AF%E5%A2%83%E5%AE%9E%E6%88%98/2.png">
-<meta property="og:image" content="http://example.com/2023/05/07/docker%E9%83%A8%E7%BD%B2python%E8%BF%90%E8%A1%8C%E7%8E%AF%E5%A2%83%E5%AE%9E%E6%88%98/3.png">
+<meta property="og:image" content="http://example.com/2023/05/07/docker%E5%AE%9E%E6%88%98/1.png">
+<meta property="og:image" content="http://example.com/2023/05/07/docker%E5%AE%9E%E6%88%98/2.png">
+<meta property="og:image" content="http://example.com/2023/05/07/docker%E5%AE%9E%E6%88%98/3.png">
 <meta property="article:published_time" content="2023-05-07T02:42:20.000Z">
-<meta property="article:modified_time" content="2023-05-07T03:13:51.834Z">
+<meta property="article:modified_time" content="2023-05-07T05:25:03.527Z">
 <meta property="article:author" content="linchen">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:image" content="http://example.com/2023/05/07/docker%E9%83%A8%E7%BD%B2python%E8%BF%90%E8%A1%8C%E7%8E%AF%E5%A2%83%E5%AE%9E%E6%88%98/1.png">
+<meta name="twitter:image" content="http://example.com/2023/05/07/docker%E5%AE%9E%E6%88%98/1.png">
   
   
   
-  <title>docker部署python运行环境实战 - linchen</title>
+  <title>docker实战 - linchen</title>
 
   <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
 
@@ -200,7 +200,7 @@
       <div class="banner-text text-center fade-in-up">
         <div class="h2">
           
-            <span id="subtitle" data-typed-text="docker部署python运行环境实战"></span>
+            <span id="subtitle" data-typed-text="docker实战"></span>
           
         </div>
 
@@ -223,7 +223,7 @@
       <span class="post-meta mr-2">
         <i class="iconfont icon-chart"></i>
         
-          3.2k words
+          5.9k words
         
       </span>
     
@@ -234,7 +234,7 @@
         
         
         
-          27 mins
+          50 mins
         
       </span>
     
@@ -272,7 +272,7 @@
         <div id="board">
           <article class="post-content mx-auto">
             <!-- SEO header -->
-            <h1 style="display: none">docker部署python运行环境实战</h1>
+            <h1 style="display: none">docker实战</h1>
             
             
               <div class="markdown-body">
@@ -283,7 +283,7 @@
 <li>创建一个名为 python-demo-test 的目录，用于存放整个项目的代码和 Dockerfile 文件。  </li>
 <li>在 python-demo-test 目录下创建一个名为 Dockerfile 的文件，并将以下内容添加到文件中：</li>
 </ol>
-<figure class="highlight dockerfile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><code class="hljs dockerfile"><span class="hljs-keyword">FROM</span> centos:<span class="hljs-number">7</span><br><br><span class="hljs-comment"># 安装必要的工具和依赖项</span><br><span class="hljs-keyword">RUN</span><span class="language-bash"> yum update -y &amp;&amp; \</span><br><span class="language-bash">    yum install -y epel-release &amp;&amp; \</span><br><span class="language-bash">    yum install -y gcc gcc-c++ python3 python3-devel python3-pip mariadb mariadb-devel mariadb-libs &amp;&amp; \</span><br><span class="language-bash">    yum clean all &amp;&amp; \</span><br><span class="language-bash">    <span class="hljs-built_in">rm</span> -rf /var/cache/yum</span><br><br><span class="hljs-comment"># 设置工作目录</span><br><span class="hljs-keyword">WORKDIR</span><span class="language-bash"> /app</span><br><br><span class="hljs-comment"># 复制应用程序代码和依赖项清单到容器中</span><br><span class="hljs-keyword">COPY</span><span class="language-bash"> . .</span><br><br><span class="hljs-comment"># 安装 Python 依赖项</span><br><span class="hljs-keyword">RUN</span><span class="language-bash"> pip3 install --no-cache-dir -r requirements.txt</span><br><br><span class="hljs-comment"># 设置环境变量</span><br><span class="hljs-keyword">ENV</span> DB_HOST=<span class="hljs-number">1.1</span>.<span class="hljs-number">1.1</span> <span class="hljs-comment">#替换为你的主机地址</span><br><span class="hljs-keyword">ENV</span> DB_NAME=docker-demo <span class="hljs-comment">#数据库名</span><br><span class="hljs-keyword">ENV</span> DB_USER=root <span class="hljs-comment">#数据库用户名</span><br><span class="hljs-keyword">ENV</span> DB_PASSWORD=example	<span class="hljs-comment">#数据库连接密码</span><br><br><span class="hljs-comment"># 开放端口</span><br><span class="hljs-keyword">EXPOSE</span> <span class="hljs-number">5000</span><br><br><span class="hljs-comment"># 启动应用程序</span><br><span class="hljs-keyword">CMD</span><span class="language-bash"> [<span class="hljs-string">&quot;python3&quot;</span>, <span class="hljs-string">&quot;app.py&quot;</span>]</span><br></code></pre></td></tr></table></figure>
+<figure class="highlight dockerfile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><code class="hljs dockerfile"><span class="hljs-keyword">FROM</span> centos:<span class="hljs-number">7</span><br><br><span class="hljs-comment"># 安装必要的工具和依赖项</span><br><span class="hljs-keyword">RUN</span><span class="language-bash"> yum update -y &amp;&amp; \</span><br><span class="language-bash">    yum install -y epel-release &amp;&amp; \</span><br><span class="language-bash">    yum install -y gcc gcc-c++ python3 python3-devel python3-pip mariadb mariadb-devel mariadb-libs &amp;&amp; \</span><br><span class="language-bash">    yum clean all &amp;&amp; \</span><br><span class="language-bash">    <span class="hljs-built_in">rm</span> -rf /var/cache/yum</span><br><br><span class="hljs-comment"># 设置工作目录</span><br><span class="hljs-keyword">WORKDIR</span><span class="language-bash"> /app</span><br><br><span class="hljs-comment"># 复制应用程序代码和依赖项清单到容器中</span><br><span class="hljs-keyword">COPY</span><span class="language-bash"> . .</span><br><br><span class="hljs-comment"># 安装 Python 依赖项</span><br><span class="hljs-keyword">RUN</span><span class="language-bash"> pip3 install --no-cache-dir -r requirements.txt</span><br><br><span class="hljs-comment"># 设置环境变量</span><br><span class="hljs-keyword">ENV</span> DB_HOST=<span class="hljs-number">1.1</span>.<span class="hljs-number">1.1</span> <span class="hljs-comment">#替换为你的服务器地址</span><br><span class="hljs-keyword">ENV</span> DB_NAME=docker-demo <span class="hljs-comment">#数据库名</span><br><span class="hljs-keyword">ENV</span> DB_USER=root <span class="hljs-comment">#数据库用户名</span><br><span class="hljs-keyword">ENV</span> DB_PASSWORD=example	<span class="hljs-comment">#数据库连接密码</span><br><br><span class="hljs-comment"># 开放端口</span><br><span class="hljs-keyword">EXPOSE</span> <span class="hljs-number">5000</span><br><br><span class="hljs-comment"># 启动应用程序</span><br><span class="hljs-keyword">CMD</span><span class="language-bash"> [<span class="hljs-string">&quot;python3&quot;</span>, <span class="hljs-string">&quot;app.py&quot;</span>]</span><br></code></pre></td></tr></table></figure>
 
 <p>在该文件中指定了 CentOS 7 镜像作为基础镜像，然后安装了一些必要的工具和依赖项，包括 Python 3、pip、MariaDB 数据库等等。接着将工作目录设置为 <code>/app</code>，并将应用程序代码和依赖项清单复制到容器中。然后使用 pip3 安装依赖项，设置了一些环境变量，并且开放了端口 5000。最后，启动了应用程序。 </p>
 <p>3.在 python-demo-test 目录下创建一个名为 <code>requirements.txt</code> 的文件，并将以下内容添加到文件中：</p>
@@ -306,31 +306,67 @@
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs shell">docker-compose up<br></code></pre></td></tr></table></figure>
 
 <p>打包运行过程比较漫长，因为需要联网下载python依赖。一顿等待后没有报错，输入docker ps查看</p>
- <img src="/2023/05/07/docker%E9%83%A8%E7%BD%B2python%E8%BF%90%E8%A1%8C%E7%8E%AF%E5%A2%83%E5%AE%9E%E6%88%98/1.png" srcset="/img/loading.gif" lazyload class=""> 
+ <img src="/2023/05/07/docker%E5%AE%9E%E6%88%98/1.png" srcset="/img/loading.gif" lazyload class=""> 
 
 <p>可以看到对应容器已经在5000端口运行了，并且制作了对应的镜像</p>
- <img src="/2023/05/07/docker%E9%83%A8%E7%BD%B2python%E8%BF%90%E8%A1%8C%E7%8E%AF%E5%A2%83%E5%AE%9E%E6%88%98/2.png" srcset="/img/loading.gif" lazyload class=""> 
+ <img src="/2023/05/07/docker%E5%AE%9E%E6%88%98/2.png" srcset="/img/loading.gif" lazyload class=""> 
 
 <p>访问服务器ip:5000端口可以看到成功显示了页面并从数据库中获取到了数据：</p>
- <img src="/2023/05/07/docker%E9%83%A8%E7%BD%B2python%E8%BF%90%E8%A1%8C%E7%8E%AF%E5%A2%83%E5%AE%9E%E6%88%98/3.png" srcset="/img/loading.gif" lazyload class=""> 
+ <img src="/2023/05/07/docker%E5%AE%9E%E6%88%98/3.png" srcset="/img/loading.gif" lazyload class=""> 
 
 <p>完成！</p>
-<h2 id="docker-hub"><a href="#docker-hub" class="headerlink" title="docker hub"></a>docker hub</h2><p>上述操作我是先在虚拟机上进行了试验，实验无误后我要迁移到服务器上，除了在服务器上重复上述步骤外，有个简便的方法就是利用docker hub推送镜像，并在服务器上拉取镜像并打成容器运行。</p>
+<h2 id="nodejs篇"><a href="#nodejs篇" class="headerlink" title="nodejs篇"></a>nodejs篇</h2><p>1.创建一个nodejs-docker-demo文件夹用来存放Dockerfile与项目代码</p>
+<p>2.进入该目录，在该目录下创建 一个名为 <code>Dockerfile</code> 的文件，用于定义 Node.js 运行环境的镜像。 </p>
+<figure class="highlight dockerfile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><code class="hljs dockerfile"><span class="hljs-keyword">FROM</span> centos:<span class="hljs-number">7</span><br><br><span class="hljs-comment"># 安装必要的软件包</span><br><span class="hljs-keyword">RUN</span><span class="language-bash"> yum update -y &amp;&amp; \</span><br><span class="language-bash">    yum install -y epel-release &amp;&amp; \</span><br><span class="language-bash">    yum install -y curl &amp;&amp; \</span><br><span class="language-bash">    curl -sL https://rpm.nodesource.com/setup_14.x | bash - &amp;&amp; \</span><br><span class="language-bash">    yum install -y nodejs &amp;&amp; \</span><br><span class="language-bash">    yum clean all</span><br><br><span class="hljs-comment"># 设置工作目录</span><br><span class="hljs-keyword">WORKDIR</span><span class="language-bash"> /app</span><br><br><span class="hljs-comment"># 复制项目文件</span><br><span class="hljs-keyword">COPY</span><span class="language-bash"> package*.json ./</span><br><br><span class="hljs-comment"># 安装依赖</span><br><span class="hljs-keyword">RUN</span><span class="language-bash"> npm install</span><br><br><span class="hljs-comment"># 复制项目文件</span><br><span class="hljs-keyword">COPY</span><span class="language-bash"> . .</span><br><br><span class="hljs-comment"># 暴露端口</span><br><span class="hljs-keyword">EXPOSE</span> <span class="hljs-number">8081</span><br><br><span class="hljs-comment"># 运行应用程序</span><br><span class="hljs-keyword">CMD</span><span class="language-bash"> [ <span class="hljs-string">&quot;npm&quot;</span>, <span class="hljs-string">&quot;start&quot;</span> ]</span><br></code></pre></td></tr></table></figure>
+
+<p> 上述 Dockerfile 文件使用 CentOS 最新版本作为基础镜像，并安装了必要的软件包和 Node.js。然后设置了工作目录并复制项目文件，安装依赖并执行启动命令。 </p>
+<p>3.创建一个名为 <code>index.js</code> 的文件，用于编写 Node.js 代码。 </p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><code class="hljs js"><span class="hljs-keyword">const</span> express = <span class="hljs-built_in">require</span>(<span class="hljs-string">&#x27;express&#x27;</span>);<br><span class="hljs-keyword">const</span> mysql = <span class="hljs-built_in">require</span>(<span class="hljs-string">&#x27;mysql&#x27;</span>);<br><br><span class="hljs-keyword">const</span> app = <span class="hljs-title function_">express</span>();<br><br><span class="hljs-keyword">const</span> connection = mysql.<span class="hljs-title function_">createConnection</span>(&#123;<br>  <span class="hljs-attr">host</span>: <span class="hljs-string">&#x27;1.1.1.1&#x27;</span>, <span class="hljs-comment">//服务器地址</span><br>  <span class="hljs-attr">user</span>: <span class="hljs-string">&#x27;root&#x27;</span>,<br>  <span class="hljs-attr">password</span>: <span class="hljs-string">&#x27;***711&#x27;</span>, <span class="hljs-comment">//数据库代码</span><br>  <span class="hljs-attr">database</span>: <span class="hljs-string">&#x27;docker-demo&#x27;</span><br>&#125;);<br><br>app.<span class="hljs-title function_">get</span>(<span class="hljs-string">&#x27;/&#x27;</span>, <span class="hljs-function">(<span class="hljs-params">req, res</span>) =&gt;</span> &#123;<br>  connection.<span class="hljs-title function_">query</span>(<span class="hljs-string">&#x27;SELECT * FROM user&#x27;</span>, <span class="hljs-function">(<span class="hljs-params">error, results, fields</span>) =&gt;</span> &#123;<br>    <span class="hljs-keyword">if</span> (error) <span class="hljs-keyword">throw</span> error;<br><br>    <span class="hljs-keyword">const</span> data = results.<span class="hljs-title function_">map</span>(<span class="hljs-function"><span class="hljs-params">result</span> =&gt;</span> (&#123;<br>      <span class="hljs-attr">id</span>: result.<span class="hljs-property">id</span>,<br>      <span class="hljs-attr">name</span>: result.<span class="hljs-property">name</span><br>    &#125;));<br><br>    res.<span class="hljs-title function_">send</span>(data);<br>  &#125;);<br>&#125;);<br><br><span class="hljs-keyword">const</span> port = process.<span class="hljs-property">env</span>.<span class="hljs-property">PORT</span> || <span class="hljs-number">8081</span>;<br>app.<span class="hljs-title function_">listen</span>(port, <span class="hljs-function">() =&gt;</span> &#123;<br>  <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-string">`App listening on port <span class="hljs-subst">$&#123;port&#125;</span>`</span>);<br>&#125;);<br></code></pre></td></tr></table></figure>
+
+<p>4.创建一个名为 <code>package.json</code> 的文件，用于定义 Node.js 应用程序的依赖项。 </p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><code class="hljs json"><span class="hljs-punctuation">&#123;</span><br>  <span class="hljs-attr">&quot;name&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;myapp&quot;</span><span class="hljs-punctuation">,</span><br>  <span class="hljs-attr">&quot;version&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;1.0.0&quot;</span><span class="hljs-punctuation">,</span><br>  <span class="hljs-attr">&quot;description&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;My Node.js app&quot;</span><span class="hljs-punctuation">,</span><br>  <span class="hljs-attr">&quot;main&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;index.js&quot;</span><span class="hljs-punctuation">,</span><br>  <span class="hljs-attr">&quot;dependencies&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">&#123;</span><br>    <span class="hljs-attr">&quot;express&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;^4.17.1&quot;</span><span class="hljs-punctuation">,</span><br>    <span class="hljs-attr">&quot;mysql&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;^2.18.1&quot;</span><br>  <span class="hljs-punctuation">&#125;</span><br><span class="hljs-punctuation">&#125;</span><br></code></pre></td></tr></table></figure>
+
+<p>5.在该目录下运行命令构建docker镜像</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs shell">docker build -t nodejs-docker-demo:1.0 .<br></code></pre></td></tr></table></figure>
+
+<p>6.创建并启动容器</p>
+<figure class="highlight apache"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs apache"><span class="hljs-attribute">docker</span> run -d --name nodejs-demo -p <span class="hljs-number">8081</span>:<span class="hljs-number">8081</span> nodejs-docker-demo:<span class="hljs-number">1</span>.<span class="hljs-number">0</span><br></code></pre></td></tr></table></figure>
+
+<p>容器成功创建并启动，访问对应端口地址可以正确从数据库中获取到数据。</p>
+<h2 id="java篇"><a href="#java篇" class="headerlink" title="java篇"></a>java篇</h2><p>1.在/root下创建java-docker-compose-test文件夹</p>
+<p>2.利用xftp将java-demo.jar、jdk8.tar.gz传输到此文件夹，java-demo自己创建一个springboot项目写一个简单的接口访问数据库即可；jdk需要自行在官网下载，注意不同小版本的jdk解压后的文件夹名会有差异，需要在Dockerfile文件中自行修改。</p>
+<p>3.创建Dockfile文件，并输入以下内容</p>
+<figure class="highlight dockerfile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><code class="hljs dockerfile"><span class="hljs-comment"># 指定基础镜像</span><br><span class="hljs-keyword">FROM</span> centos:latest<br><span class="hljs-comment"># 配置环境变量，JDK的安装目录</span><br><span class="hljs-keyword">ENV</span> JAVA_DIR=/usr/local<br><br><span class="hljs-comment"># 拷贝jdk和java项目的包</span><br><span class="hljs-keyword">COPY</span><span class="language-bash"> ./jdk8.tar.gz <span class="hljs-variable">$JAVA_DIR</span>/</span><br><span class="hljs-keyword">COPY</span><span class="language-bash"> ./java_demo.jar /app/</span><br><br><span class="hljs-comment"># 安装JDK</span><br><span class="hljs-keyword">RUN</span><span class="language-bash"> <span class="hljs-built_in">cd</span> <span class="hljs-variable">$JAVA_DIR</span> \</span><br><span class="language-bash"> &amp;&amp; tar -xf ./jdk8.tar.gz \</span><br><span class="language-bash"> &amp;&amp; <span class="hljs-built_in">mv</span> ./jdk1.8.0_161 ./java8 <span class="hljs-comment">#将./jdk1.8.0_161替换为你jdk压缩包的真正解压文件名</span></span><br><br><span class="hljs-comment"># 配置环境变量</span><br><span class="hljs-keyword">ENV</span> JAVA_HOME=$JAVA_DIR/java8<br><span class="hljs-keyword">ENV</span> PATH=$PATH:$JAVA_HOME/bin<br><br><span class="hljs-comment"># 暴露端口</span><br><span class="hljs-keyword">EXPOSE</span> <span class="hljs-number">8080</span><br><span class="hljs-comment"># 入口，java项目的启动命令</span><br><span class="hljs-keyword">ENTRYPOINT</span><span class="language-bash"> java -jar /app/java_demo.jar</span><br></code></pre></td></tr></table></figure>
+
+<ol>
+<li>在java-docker-compose-test目录下运行如下指令</li>
+</ol>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs shell">docker build -t java-docker-demo:1.0 .<br></code></pre></td></tr></table></figure>
+
+<p> ps ：注意末尾的点，表示Dockerfile文件在当前目录下</p>
+<ol>
+<li>运行容器</li>
+</ol>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs shell">docker run --name java-demo -p 8080:8080 -d java-docker-demo:1.0<br></code></pre></td></tr></table></figure>
+
+<h3 id=""><a href="#" class="headerlink" title=""></a></h3><h2 id="docker-hub实现镜像迁移"><a href="#docker-hub实现镜像迁移" class="headerlink" title="docker hub实现镜像迁移"></a>docker hub实现镜像迁移</h2><p>上述操作我是先在虚拟机上进行了试验，实验无误后我要迁移到服务器上，除了在服务器上重复上述步骤外，有个简便的方法就是利用docker hub推送镜像，并在服务器上拉取镜像并打成容器运行。</p>
 <p>步骤：</p>
 <p>1.如果还没有docker hub账号，需要先去<a target="_blank" rel="noopener" href="https://hub.docker.com/">官网</a>注册一个，并创建一个你准备用来存放镜像的仓库。</p>
 <p>2.在虚拟机上登录docker hub账号</p>
-<figure class="highlight ebnf"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs ebnf"><span class="hljs-attribute">docker login</span><br></code></pre></td></tr></table></figure>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs shell">docker login<br></code></pre></td></tr></table></figure>
 
 <p>3.给镜像打标签：</p>
-<figure class="highlight pf"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs pf">docker <span class="hljs-keyword">tag</span> <span class="hljs-variable">&lt;image_name&gt;</span> <span class="hljs-variable">&lt;docker_hub_username&gt;</span>/<span class="hljs-variable">&lt;repository_name&gt;</span>:<span class="hljs-variable">&lt;tag&gt;</span><br></code></pre></td></tr></table></figure>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs shell">docker tag &lt;image_name&gt; &lt;docker_hub_username&gt;/&lt;repository_name&gt;:&lt;tag&gt;<br></code></pre></td></tr></table></figure>
 
 <p> 其中，image_name是本地镜像的名称， docker_hub_username是你的dockerHub用户名，repository_name是仓库名称， tag是要推送的镜像的标签。 </p>
 <p>4.将镜像推送到dockerHub</p>
-<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs xml">docker push <span class="hljs-tag">&lt;<span class="hljs-name">docker_hub_username</span>&gt;</span>/<span class="hljs-tag">&lt;<span class="hljs-name">repository_name</span>&gt;</span>:<span class="hljs-tag">&lt;<span class="hljs-name">tag</span>&gt;</span><br></code></pre></td></tr></table></figure>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs shell">docker push &lt;docker_hub_username&gt;/&lt;repository_name&gt;:&lt;tag&gt;<br></code></pre></td></tr></table></figure>
 
 <p>5.推送成功后即可在另一台服务器上拉取镜像</p>
-<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs xml">docker pull <span class="hljs-tag">&lt;<span class="hljs-name">docker_hub_username</span>&gt;</span>/<span class="hljs-tag">&lt;<span class="hljs-name">repository_name</span>&gt;</span>:<span class="hljs-tag">&lt;<span class="hljs-name">tag</span>&gt;</span><br></code></pre></td></tr></table></figure>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs shell">docker pull &lt;docker_hub_username&gt;/&lt;repository_name&gt;:&lt;tag&gt;<br></code></pre></td></tr></table></figure>
 
+<p>6.拉取完毕再根据镜像创建一个容器运行即可。</p>
+<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><p><a target="_blank" rel="noopener" href="https://pachwang.github.io/2023/05/02/Docker%E8%BF%90%E7%94%A8%E5%AE%9E%E6%88%98/#%E5%8F%82%E8%80%83">https://pachwang.github.io/2023/05/02/Docker%E8%BF%90%E7%94%A8%E5%AE%9E%E6%88%98/#%E5%8F%82%E8%80%83</a></p>
 
                 
               </div>
@@ -348,8 +384,8 @@
 
   <div class="license-box my-3">
     <div class="license-title">
-      <div>docker部署python运行环境实战</div>
-      <div>http://example.com/2023/05/07/docker部署python运行环境实战/</div>
+      <div>docker实战</div>
+      <div>http://example.com/2023/05/07/docker实战/</div>
     </div>
     <div class="license-meta">
       
@@ -393,12 +429,18 @@
                   <article class="post-prev col-6">
                     
                     
+                      <a href="/2023/05/07/docker%E9%83%A8%E7%BD%B2python%E8%BF%90%E8%A1%8C%E7%8E%AF%E5%A2%83%E5%AE%9E%E6%88%98/" title="docker部署python运行环境实战">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">docker部署python运行环境实战</span>
+                        <span class="visible-mobile">Previous</span>
+                      </a>
+                    
                   </article>
                   <article class="post-next col-6">
                     
                     
-                      <a href="/2023/05/07/docker%E5%AE%9E%E6%88%98/" title="docker实战">
-                        <span class="hidden-mobile">docker实战</span>
+                      <a href="/2023/05/05/%E9%A1%B9%E7%9B%AE%E9%9B%86%E6%88%90baskreport%E6%8A%A5%E8%A1%A8%E9%A1%B9%E7%9B%AE%E5%B9%B6%E5%AE%9E%E7%8E%B0%E5%8D%95%E7%82%B9%E7%99%BB%E5%BD%95/" title="项目集成baskreport报表项目并实现单点登录">
+                        <span class="hidden-mobile">项目集成baskreport报表项目并实现单点登录</span>
                         <span class="visible-mobile">Next</span>
                         <i class="iconfont icon-arrowright"></i>
                       </a>
