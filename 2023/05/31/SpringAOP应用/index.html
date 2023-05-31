@@ -1,0 +1,654 @@
+
+
+<!DOCTYPE html>
+<html lang="en" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/fluid.png">
+  <link rel="icon" href="/img/fluid.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="linchen">
+  <meta name="keywords" content="">
+  
+    <meta name="description" content="需求：原本的增删改查接口已写好，先需要对接口方法执行前增加一些判断，但不符合要求时返回错误，而不执行相应的方法。 思考：涉及同一包下多个模块的controller，为了提高代码重用性，决定采用aop的思想将这部分的判断逻辑抽象出来切入到对应的模块中。 关键注解先介绍下下述过程中需要用到的几个关键注解： 异常声明类1@SneakyThrows  ​    是 Lombok 提供的一个注解，它可以用于">
+<meta property="og:type" content="article">
+<meta property="og:title" content="SpringAOP应用">
+<meta property="og:url" content="http://example.com/2023/05/31/SpringAOP%E5%BA%94%E7%94%A8/index.html">
+<meta property="og:site_name" content="linchen">
+<meta property="og:description" content="需求：原本的增删改查接口已写好，先需要对接口方法执行前增加一些判断，但不符合要求时返回错误，而不执行相应的方法。 思考：涉及同一包下多个模块的controller，为了提高代码重用性，决定采用aop的思想将这部分的判断逻辑抽象出来切入到对应的模块中。 关键注解先介绍下下述过程中需要用到的几个关键注解： 异常声明类1@SneakyThrows  ​    是 Lombok 提供的一个注解，它可以用于">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2023-05-31T15:06:03.000Z">
+<meta property="article:modified_time" content="2023-05-31T15:06:59.597Z">
+<meta property="article:author" content="linchen">
+<meta name="twitter:card" content="summary_large_image">
+  
+  
+  
+  <title>SpringAOP应用 - linchen</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_hj8rtnfg7um.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_lbnruvf0jn.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"example.com","root":"/","version":"1.9.4","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":null,"gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml"};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+  
+
+
+  
+<meta name="generator" content="Hexo 5.4.2"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>林晨的个人博客</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/">
+                <i class="iconfont icon-home-fill"></i>
+                <span>Home</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/">
+                <i class="iconfont icon-archive-fill"></i>
+                <span>Archives</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/">
+                <i class="iconfont icon-category-fill"></i>
+                <span>Categories</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/">
+                <i class="iconfont icon-tags-fill"></i>
+                <span>Tags</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/">
+                <i class="iconfont icon-user-fill"></i>
+                <span>About</span>
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <i class="iconfont icon-search"></i>
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">
+              <i class="iconfont icon-dark" id="color-toggle-icon"></i>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/default.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="SpringAOP应用"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2023-05-31 23:06" pubdate>
+          May 31, 2023 pm
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          2.8k words
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          24 mins
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <!-- SEO header -->
+            <h1 style="display: none">SpringAOP应用</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <p>需求：原本的增删改查接口已写好，先需要对接口方法执行前增加一些判断，但不符合要求时返回错误，而不执行相应的方法。</p>
+<p>思考：涉及同一包下多个模块的controller，为了提高代码重用性，决定采用aop的思想将这部分的判断逻辑抽象出来切入到对应的模块中。</p>
+<h2 id="关键注解"><a href="#关键注解" class="headerlink" title="关键注解"></a>关键注解</h2><p>先介绍下下述过程中需要用到的几个关键注解：</p>
+<h3 id="异常声明类"><a href="#异常声明类" class="headerlink" title="异常声明类"></a>异常声明类</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-meta">@SneakyThrows</span><br></code></pre></td></tr></table></figure>
+
+<p>​    是 Lombok 提供的一个注解，它可以用于简化 Java 代码中的异常处理。通常情况下，Java 中的方法需要在方法签名上声明要抛出的异常类型，或者使用 try-catch 块来捕获和处理异常。而使用 <code>@SneakyThrows</code> 注解，可以在方法中抛出受检查异常（checked exception）而不需要在方法签名上声明该异常。此外，<code>@SneakyThrows</code> 注解还会自动捕获和重新抛出任何非受检查异常（unchecked exception），从而起到简化代码的作用。</p>
+<h3 id="切面类"><a href="#切面类" class="headerlink" title="切面类"></a>切面类</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-meta">@Aspect</span><br></code></pre></td></tr></table></figure>
+
+<p>定义一个切面，用于指定切面要应用的方法或类，并定义通知，可以将多个通知集成到一个切面中。步骤如下：</p>
+<ol>
+<li>定义一个切面类，并在类上添加 <code>@Aspect</code> 注解。</li>
+<li>定义一个或多个切点（Pointcut），用于匹配需要应用切面的方法。</li>
+<li>定义一个或多个通知（Advice），用于在切点匹配到的方法执行前、执行后或执行过程中执行一些操作。</li>
+</ol>
+<h3 id="切点类"><a href="#切点类" class="headerlink" title="切点类"></a>切点类</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-meta">@PointCut</span><br></code></pre></td></tr></table></figure>
+
+<p>定义一个切点，用于指定切面要应用的方法或类。</p>
+<h3 id="通知类"><a href="#通知类" class="headerlink" title="通知类"></a>通知类</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-meta">@Around</span><br></code></pre></td></tr></table></figure>
+
+<p><code>@Around</code> 是 Spring 框架中的一个切面（Aspect）注解，它可以用于定义一个环绕通知（Around Advice），即在目标方法执行前后都执行一些逻辑，可以控制目标方法的执行流程。</p>
+<p>使用 <code>@Around</code> 注解，需要定义一个方法，该方法的返回值类型为 <code>Object</code>，并且接受一个 <code>ProceedingJoinPoint</code> 参数。<code>ProceedingJoinPoint</code> 是 Spring 框架提供的一个接口，它表示连接点（Join Point）即目标方法的执行点，可以在该接口中调用 <code>proceed()</code> 方法来继续执行该方法。</p>
+<p>类似的注解还有:</p>
+<ol>
+<li><code>@Around</code>：在目标方法执行前后都执行该方法，可以控制目标方法的执行流程。</li>
+<li><code>@Before</code>：在目标方法执行前执行该方法，可以用于进行一些预处理操作。</li>
+<li><code>@After</code>：在目标方法执行后执行该方法，可以用于进行一些后处理操作。</li>
+<li><code>@AfterReturning</code>：在目标方法执行后执行该方法，可以用于获取目标方法的返回值并进行处理。</li>
+<li><code>@AfterThrowing</code>：在目标方法抛出异常时执行该方法，可以用于捕获和处理异常。</li>
+</ol>
+<p>@After与@AfterReturning的主要区别在于前者无论目标方法是否抛出异常都会执行，主要用于一些后置处理操作如释放资源、记录日志等，而后者只有当目标方法正确执行并返回结果时才会执行，主要是为了对返回结果做一些处理等。</p>
+<h2 id="AOP实战"><a href="#AOP实战" class="headerlink" title="AOP实战"></a>AOP实战</h2><p>以如下增添接口为例，该接口位于 com.bkdr.weeklyReport.controller 包下，</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-meta">@PostMapping(&quot;/add&quot;)</span><br><span class="hljs-keyword">public</span> AjaxResult&lt;Long&gt; <span class="hljs-title function_">add</span><span class="hljs-params">(<span class="hljs-meta">@Validated</span> <span class="hljs-meta">@RequestBody</span> FinanceWeeklyReportAddBo bo)</span> &#123;<br>    <span class="hljs-keyword">return</span> AjaxResult.success(iFinanceWeeklyReportService.insertByAddBo(bo));<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<h3 id="定义切面类"><a href="#定义切面类" class="headerlink" title="定义切面类"></a>定义切面类</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-meta">@Aspect</span><br><span class="hljs-meta">@Component</span><br><span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">DszAnnotationsMonitor</span> &#123;<br><br>&#125;<br></code></pre></td></tr></table></figure>
+
+<h3 id="定义切点"><a href="#定义切点" class="headerlink" title="定义切点"></a>定义切点</h3><p>切点是com.bkdr包下所有子包下的controller包的所有controller类的add方法</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-meta">@Pointcut(&quot;execution(* com.bkdr.*.controller.*.add(..))&quot;)</span><br>	<span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">addMethodsPointCut</span><span class="hljs-params">()</span> &#123;<br>	&#125;<br></code></pre></td></tr></table></figure>
+
+<h3 id="定义通知"><a href="#定义通知" class="headerlink" title="定义通知"></a>定义通知</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-meta">@Around(value = &quot;addMethodsPointCut()&quot;)</span><br><span class="hljs-meta">@SneakyThrows</span><br><span class="hljs-keyword">public</span> Object <span class="hljs-title function_">checkDate</span><span class="hljs-params">(ProceedingJoinPoint joinPoint)</span> &#123;<br>   <span class="hljs-type">FinanceWeeklyReportAddBo</span> <span class="hljs-variable">addBo</span> <span class="hljs-operator">=</span> (FinanceWeeklyReportAddBo) joinPoint.getArgs()[<span class="hljs-number">0</span>];<br>   <span class="hljs-comment">//获取queryBo对象</span><br>   <span class="hljs-type">FinanceWeeklyReportQueryBo</span> <span class="hljs-variable">bo</span> <span class="hljs-operator">=</span> (FinanceWeeklyReportQueryBo)getBo(joinPoint, <span class="hljs-string">&quot;Add&quot;</span>, <span class="hljs-string">&quot;Query&quot;</span>);<br>   <span class="hljs-comment">//获取service bean对象</span><br>   <span class="hljs-type">Object</span> <span class="hljs-variable">service</span> <span class="hljs-operator">=</span> getService(joinPoint);<br>   <span class="hljs-comment">//执行查询方法</span><br>   <span class="hljs-type">Method</span> <span class="hljs-variable">method</span> <span class="hljs-operator">=</span> getQueryListMethods(service, <span class="hljs-string">&quot;queryList&quot;</span>);<br><br>   <span class="hljs-comment">/**</span><br><span class="hljs-comment">    ...查询数据库判断能否添加的逻辑</span><br><span class="hljs-comment">    */</span><br>    <span class="hljs-comment">//根据业务逻辑判断执行逻辑，                 返回500错误码         继续执行方法</span><br>   <span class="hljs-keyword">return</span> weeklySize != <span class="hljs-number">0</span> ? AjaxResult.error(<span class="hljs-string">&quot;本周周报已存在&quot;</span>) : joinPoint.proceed();<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<h3 id="反射"><a href="#反射" class="headerlink" title="反射"></a>反射</h3><p>上面的方法中用到的方法getService()是对反射的应用，也挺有意思的，值得学习</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-meta">@SneakyThrows</span><br><span class="hljs-keyword">private</span> Object <span class="hljs-title function_">getService</span><span class="hljs-params">(ProceedingJoinPoint joinPoint)</span> &#123;<br>	Field[] fields = joinPoint.getTarget().getClass().getDeclaredFields(); <span class="hljs-comment">//通过joinPoint的target就是目标																					controller</span><br>	<span class="hljs-type">Object</span> <span class="hljs-variable">service</span> <span class="hljs-operator">=</span> <span class="hljs-literal">null</span>;	<span class="hljs-comment">//在每个controller中一般都会注入其对应的service，因此可以便利其属性得到service</span><br>	<span class="hljs-keyword">for</span> (Field field : fields) &#123;<br>		field.setAccessible(<span class="hljs-literal">true</span>);<br>		<span class="hljs-keyword">if</span> (field.isAnnotationPresent(Resource.class) || (field.isAnnotationPresent(Autowired.class))) &#123;<br>			service = SpringUtil.getBean(field.getType());<br>			<span class="hljs-keyword">break</span>;<br>		&#125;<br>	&#125;<br>	<span class="hljs-keyword">return</span> service;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>SpringAOP应用</div>
+      <div>http://example.com/2023/05/31/SpringAOP应用/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>Author</div>
+          <div>linchen</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>Posted on</div>
+          <div>May 31, 2023</div>
+        </div>
+      
+      
+      
+        <div class="license-meta-item">
+          <div>Licensed under</div>
+          <div>
+            
+              
+              
+                <a target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="BY - Attribution">
+                    <i class="iconfont icon-by"></i>
+                  </span>
+                </a>
+              
+            
+          </div>
+        </div>
+      
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/2023/05/20/bug%E8%AE%B0%E5%BD%95/" title="bug记录">
+                        <span class="hidden-mobile">bug记录</span>
+                        <span class="visible-mobile">Next</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header">
+    <i class="iconfont icon-list"></i>
+    <span>Table of Contents</span>
+  </p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">Search</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">Keyword</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> 
+    </div>
+  
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.0/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.18.2/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init(Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc));
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://lib.baomitu.com/clipboard.js/2.0.11/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/4.3.1/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">Blog works best with JavaScript enabled</div>
+  </noscript>
+</body>
+</html>
