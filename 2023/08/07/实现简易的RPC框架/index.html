@@ -1,0 +1,688 @@
+
+
+<!DOCTYPE html>
+<html lang="en" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/fluid.png">
+  <link rel="icon" href="/img/fluid.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="linchen">
+  <meta name="keywords" content="">
+  
+    <meta name="description" content="MyRPC介绍自己写的一个简易RPC轮子，服务端采用Tomcat服务器，消费端使用HTTP协议发送网络请求，没有使用专门的服务注册中心，而是使用本地HashMap模拟这种映射关系。 软件架构软件架构说明  Consumer 包：作为消费者调用服务提供方的接口。 LinchenRPC 包：远程调用过程的一些具体实现细节。 Provider 包：实现需要对外暴露的接口，同时启动一个服务处理调用方的请求">
+<meta property="og:type" content="article">
+<meta property="og:title" content="实现简易的RPC框架">
+<meta property="og:url" content="http://example.com/2023/08/07/%E5%AE%9E%E7%8E%B0%E7%AE%80%E6%98%93%E7%9A%84RPC%E6%A1%86%E6%9E%B6/index.html">
+<meta property="og:site_name" content="linchen">
+<meta property="og:description" content="MyRPC介绍自己写的一个简易RPC轮子，服务端采用Tomcat服务器，消费端使用HTTP协议发送网络请求，没有使用专门的服务注册中心，而是使用本地HashMap模拟这种映射关系。 软件架构软件架构说明  Consumer 包：作为消费者调用服务提供方的接口。 LinchenRPC 包：远程调用过程的一些具体实现细节。 Provider 包：实现需要对外暴露的接口，同时启动一个服务处理调用方的请求">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="http://example.com/2023/08/07/%E5%AE%9E%E7%8E%B0%E7%AE%80%E6%98%93%E7%9A%84RPC%E6%A1%86%E6%9E%B6/img/1691385769793.png">
+<meta property="og:image" content="http://example.com/2023/08/07/%E5%AE%9E%E7%8E%B0%E7%AE%80%E6%98%93%E7%9A%84RPC%E6%A1%86%E6%9E%B6/img/1691385813527.png">
+<meta property="og:image" content="http://example.com/2023/08/07/%E5%AE%9E%E7%8E%B0%E7%AE%80%E6%98%93%E7%9A%84RPC%E6%A1%86%E6%9E%B6/img/1691385832872.png">
+<meta property="og:image" content="http://example.com/2023/08/07/%E5%AE%9E%E7%8E%B0%E7%AE%80%E6%98%93%E7%9A%84RPC%E6%A1%86%E6%9E%B6/img/1691385846861.png">
+<meta property="og:image" content="http://example.com/2023/08/07/%E5%AE%9E%E7%8E%B0%E7%AE%80%E6%98%93%E7%9A%84RPC%E6%A1%86%E6%9E%B6/img/1691385862818.png">
+<meta property="og:image" content="http://example.com/2023/08/07/%E5%AE%9E%E7%8E%B0%E7%AE%80%E6%98%93%E7%9A%84RPC%E6%A1%86%E6%9E%B6/img/1691385872964.png">
+<meta property="og:image" content="http://example.com/2023/08/07/%E5%AE%9E%E7%8E%B0%E7%AE%80%E6%98%93%E7%9A%84RPC%E6%A1%86%E6%9E%B6/img/1691385886324.png">
+<meta property="article:published_time" content="2023-08-07T05:59:32.000Z">
+<meta property="article:modified_time" content="2023-08-07T06:00:41.189Z">
+<meta property="article:author" content="linchen">
+<meta property="article:tag" content="Java、RPC">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="http://example.com/2023/08/07/%E5%AE%9E%E7%8E%B0%E7%AE%80%E6%98%93%E7%9A%84RPC%E6%A1%86%E6%9E%B6/img/1691385769793.png">
+  
+  
+  
+  <title>实现简易的RPC框架 - linchen</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_hj8rtnfg7um.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_lbnruvf0jn.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"example.com","root":"/","version":"1.9.4","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":null,"gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml"};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+  
+
+
+  
+<meta name="generator" content="Hexo 5.4.2"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>林晨的个人博客</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/">
+                <i class="iconfont icon-home-fill"></i>
+                <span>Home</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/">
+                <i class="iconfont icon-archive-fill"></i>
+                <span>Archives</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/">
+                <i class="iconfont icon-category-fill"></i>
+                <span>Categories</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/">
+                <i class="iconfont icon-tags-fill"></i>
+                <span>Tags</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/">
+                <i class="iconfont icon-user-fill"></i>
+                <span>About</span>
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <i class="iconfont icon-search"></i>
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">
+              <i class="iconfont icon-dark" id="color-toggle-icon"></i>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/default.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="实现简易的RPC框架"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2023-08-07 13:59" pubdate>
+          August 7, 2023 pm
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          13k words
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          107 mins
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <!-- SEO header -->
+            <h1 style="display: none">实现简易的RPC框架</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <h1 id="MyRPC"><a href="#MyRPC" class="headerlink" title="MyRPC"></a>MyRPC</h1><h4 id="介绍"><a href="#介绍" class="headerlink" title="介绍"></a>介绍</h4><p>自己写的一个简易RPC轮子，服务端采用Tomcat服务器，消费端使用HTTP协议发送网络请求，没有使用专门的服务注册中心，而是使用本地HashMap模拟这种映射关系。</p>
+<h4 id="软件架构"><a href="#软件架构" class="headerlink" title="软件架构"></a>软件架构</h4><p>软件架构说明</p>
+<p><img src="img/1691385769793.png" srcset="/img/loading.gif" lazyload alt="1691385769793"></p>
+<p>Consumer 包：作为消费者调用服务提供方的接口。</p>
+<p>LinchenRPC 包：远程调用过程的一些具体实现细节。</p>
+<p>Provider 包：实现需要对外暴露的接口，同时启动一个服务处理调用方的请求。</p>
+<p>Provider-common包：Provider所需要实现的接口，便于消费端调用。</p>
+<h4 id="实现过程"><a href="#实现过程" class="headerlink" title="实现过程"></a>实现过程</h4><h5 id="编写统一接口"><a href="#编写统一接口" class="headerlink" title="编写统一接口"></a>编写统一接口</h5><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">package</span> com.linchen;<br><br><span class="hljs-keyword">public</span> <span class="hljs-keyword">interface</span> <span class="hljs-title class_">HelloService</span> &#123;<br>    <span class="hljs-keyword">public</span> String <span class="hljs-title function_">sayHello</span><span class="hljs-params">(String name)</span>;<br>&#125;<br><br></code></pre></td></tr></table></figure>
+
+<p>作为消费端需要依赖这个模块，直接调用接口方法，就像调用本地接口一样</p>
+<p>作为服务提供方需要实现这个接口，可以有不同的实现方案。</p>
+<h5 id="编写远程调用过程所需要实现的一些具体细节"><a href="#编写远程调用过程所需要实现的一些具体细节" class="headerlink" title="编写远程调用过程所需要实现的一些具体细节"></a>编写远程调用过程所需要实现的一些具体细节</h5><p><img src="img/1691385813527.png" srcset="/img/loading.gif" lazyload alt="1691385813527"></p>
+<h6 id="Invocation："><a href="#Invocation：" class="headerlink" title="Invocation："></a>Invocation：</h6><p>定义了四个消费端调用远程接口时需要传递的参数，并提供构造器和变量的get、set方法</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">package</span> com.linchen.common;<br><br><span class="hljs-keyword">import</span> java.io.Serializable;<br><br><span class="hljs-comment">/**</span><br><span class="hljs-comment"> * <span class="hljs-doctag">@Author</span> 林晨</span><br><span class="hljs-comment"> * <span class="hljs-doctag">@Date</span> 2023-08-06 11:19</span><br><span class="hljs-comment"> * <span class="hljs-doctag">@PackageName</span>:com.linchen.common</span><br><span class="hljs-comment"> * <span class="hljs-doctag">@ClassName</span>: Invocation</span><br><span class="hljs-comment"> * <span class="hljs-doctag">@Description</span>: 消费端调用时需要传递的参数</span><br><span class="hljs-comment"> * <span class="hljs-doctag">@Version</span> 1.0</span><br><span class="hljs-comment"> */</span><br><span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">Invocation</span> <span class="hljs-keyword">implements</span> <span class="hljs-title class_">Serializable</span> &#123;<br>    <span class="hljs-comment">//接口名</span><br>    <span class="hljs-keyword">private</span> String InterfaceName;<br>    <span class="hljs-comment">//方法名</span><br>    <span class="hljs-keyword">private</span> String methodName;<br>    <span class="hljs-comment">//方法类型参数</span><br>    <span class="hljs-keyword">private</span> Class[] parameterTypes;<br>    <span class="hljs-comment">//方法参数</span><br>    <span class="hljs-keyword">private</span> Object[] parameters;<br><br>    <span class="hljs-keyword">public</span> <span class="hljs-title function_">Invocation</span><span class="hljs-params">(String interfaceName, String methodName, Class[] parameterTypes, Object[] parameters)</span> &#123;<br>        InterfaceName = interfaceName;<br>        <span class="hljs-built_in">this</span>.methodName = methodName;<br>        <span class="hljs-built_in">this</span>.parameterTypes = parameterTypes;<br>        <span class="hljs-built_in">this</span>.parameters = parameters;<br>    &#125;<br><br>    <span class="hljs-keyword">public</span> <span class="hljs-title function_">Invocation</span><span class="hljs-params">()</span> &#123;<br>    &#125;<br><br>    <span class="hljs-keyword">public</span> String <span class="hljs-title function_">getInterfaceName</span><span class="hljs-params">()</span> &#123;<br>        <span class="hljs-keyword">return</span> InterfaceName;<br>    &#125;<br><br>    <span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">setInterfaceName</span><span class="hljs-params">(String interfaceName)</span> &#123;<br>        InterfaceName = interfaceName;<br>    &#125;<br><br>    <span class="hljs-keyword">public</span> String <span class="hljs-title function_">getMethodName</span><span class="hljs-params">()</span> &#123;<br>        <span class="hljs-keyword">return</span> methodName;<br>    &#125;<br><br>    <span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">setMethodName</span><span class="hljs-params">(String methodName)</span> &#123;<br>        <span class="hljs-built_in">this</span>.methodName = methodName;<br>    &#125;<br><br>    <span class="hljs-keyword">public</span> Class[] getParameterTypes() &#123;<br>        <span class="hljs-keyword">return</span> parameterTypes;<br>    &#125;<br><br>    <span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">setParameterTypes</span><span class="hljs-params">(Class[] parameterTypes)</span> &#123;<br>        <span class="hljs-built_in">this</span>.parameterTypes = parameterTypes;<br>    &#125;<br><br>    <span class="hljs-keyword">public</span> Object[] getParameters() &#123;<br>        <span class="hljs-keyword">return</span> parameters;<br>    &#125;<br><br>    <span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">setParameters</span><span class="hljs-params">(Object[] parameters)</span> &#123;<br>        <span class="hljs-built_in">this</span>.parameters = parameters;<br>    &#125;<br>&#125;<br><br></code></pre></td></tr></table></figure>
+
+<h6 id="URL："><a href="#URL：" class="headerlink" title="URL："></a>URL：</h6><p>定义了服务运行在的主机地址（hostname）与端口号（port）</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">package</span> com.linchen.common;<br><br><span class="hljs-keyword">import</span> java.io.Serializable;<br><br><span class="hljs-comment">/**</span><br><span class="hljs-comment"> * <span class="hljs-doctag">@Author</span> 林晨</span><br><span class="hljs-comment"> * <span class="hljs-doctag">@Date</span> 2023-08-06 13:36</span><br><span class="hljs-comment"> * <span class="hljs-doctag">@PackageName</span>:com.linchen.common</span><br><span class="hljs-comment"> * <span class="hljs-doctag">@ClassName</span>: URL</span><br><span class="hljs-comment"> * <span class="hljs-doctag">@Description</span>: 定义主机地址与端口号</span><br><span class="hljs-comment"> * <span class="hljs-doctag">@Version</span> 1.0</span><br><span class="hljs-comment"> */</span><br><span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">URL</span> <span class="hljs-keyword">implements</span> <span class="hljs-title class_">Serializable</span> &#123;<br>    <span class="hljs-keyword">private</span> String hostname;<br>    <span class="hljs-keyword">private</span> Integer port;<br><br>    <span class="hljs-keyword">public</span> <span class="hljs-title function_">URL</span><span class="hljs-params">()</span> &#123;<br>    &#125;<br><br>    <span class="hljs-keyword">public</span> <span class="hljs-title function_">URL</span><span class="hljs-params">(String hostname, Integer port)</span> &#123;<br>        <span class="hljs-built_in">this</span>.hostname = hostname;<br>        <span class="hljs-built_in">this</span>.port = port;<br>    &#125;<br><br>    <span class="hljs-keyword">public</span> String <span class="hljs-title function_">getHostname</span><span class="hljs-params">()</span> &#123;<br>        <span class="hljs-keyword">return</span> hostname;<br>    &#125;<br><br>    <span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">setHostname</span><span class="hljs-params">(String hostname)</span> &#123;<br>        <span class="hljs-built_in">this</span>.hostname = hostname;<br>    &#125;<br><br>    <span class="hljs-keyword">public</span> Integer <span class="hljs-title function_">getPort</span><span class="hljs-params">()</span> &#123;<br>        <span class="hljs-keyword">return</span> port;<br>    &#125;<br><br>    <span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">setPort</span><span class="hljs-params">(Integer port)</span> &#123;<br>        <span class="hljs-built_in">this</span>.port = port;<br>    &#125;<br>&#125;<br><br></code></pre></td></tr></table></figure>
+
+<h6 id="LoadBalance：负载均衡"><a href="#LoadBalance：负载均衡" class="headerlink" title="LoadBalance：负载均衡"></a>LoadBalance：负载均衡</h6><p>是自定义的一种负载均衡算法，服务提供方可能搭建了集群，消费端从注册中心（本代码使用本地文件写入的方式实现）可能得到多个服务端地址，自定义负载均衡算法以确定实际对哪个服务端发起调用。我的实现只是一个随机数算法。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">package</span> com.linchen.loadBalance;<br><br><span class="hljs-keyword">import</span> com.linchen.common.URL;<br><br><span class="hljs-keyword">import</span> java.util.List;<br><span class="hljs-keyword">import</span> java.util.Random;<br><br><span class="hljs-comment">/**</span><br><span class="hljs-comment"> * <span class="hljs-doctag">@Author</span> 林晨</span><br><span class="hljs-comment"> * <span class="hljs-doctag">@Date</span> 2023-08-06 13:57</span><br><span class="hljs-comment"> * <span class="hljs-doctag">@PackageName</span>:com.linchen.loadBalance</span><br><span class="hljs-comment"> * <span class="hljs-doctag">@ClassName</span>: LoadBalance</span><br><span class="hljs-comment"> * <span class="hljs-doctag">@Description</span>: 模拟负载均衡算法</span><br><span class="hljs-comment"> * <span class="hljs-doctag">@Version</span> 1.0</span><br><span class="hljs-comment"> */</span><br><span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">LoadBalance</span> &#123;<br>    <span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> URL <span class="hljs-title function_">random</span><span class="hljs-params">(List&lt;URL&gt; urlList)</span>&#123;<br>        <span class="hljs-type">Random</span> <span class="hljs-variable">random</span> <span class="hljs-operator">=</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">Random</span>();<br>        <span class="hljs-keyword">return</span> urlList.get(random.nextInt(urlList.size()));<br>    &#125;<br>&#125;<br><br></code></pre></td></tr></table></figure>
+
+<h6 id="DispatcherServlet：Servlet容器"><a href="#DispatcherServlet：Servlet容器" class="headerlink" title="DispatcherServlet：Servlet容器"></a>DispatcherServlet：Servlet容器</h6><p>Tomcat的Servlet容器，被服务端用于处理调用请求。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">package</span> com.linchen.protocol;<br><br><span class="hljs-keyword">import</span> javax.servlet.ServletException;<br><span class="hljs-keyword">import</span> javax.servlet.ServletRequest;<br><span class="hljs-keyword">import</span> javax.servlet.ServletResponse;<br><span class="hljs-keyword">import</span> javax.servlet.http.HttpServlet;<br><span class="hljs-keyword">import</span> javax.servlet.http.HttpServletRequest;<br><span class="hljs-keyword">import</span> javax.servlet.http.HttpServletResponse;<br><span class="hljs-keyword">import</span> java.io.IOException;<br><br><span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">DispatcherServlet</span> <span class="hljs-keyword">extends</span> <span class="hljs-title class_">HttpServlet</span> &#123;<br>    <span class="hljs-meta">@Override</span><br>    <span class="hljs-keyword">protected</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">service</span><span class="hljs-params">(HttpServletRequest req, HttpServletResponse resp)</span> <span class="hljs-keyword">throws</span> ServletException, IOException &#123;<br>        <span class="hljs-comment">//此处只是简单调用我们的handler处理方法，这样我们后续如果需要对对请求做出不同的响应时，就可以定义新的handler来处理，降低系统的耦合度</span><br>        <span class="hljs-keyword">new</span> <span class="hljs-title class_">HttpServerHandler</span>().handler(req,resp);<br>    &#125;<br><br>&#125;<br><br></code></pre></td></tr></table></figure>
+
+<h6 id="HttpServerHandler：处理器"><a href="#HttpServerHandler：处理器" class="headerlink" title="HttpServerHandler：处理器"></a>HttpServerHandler：处理器</h6><p>以下实现基于：消费端与服务端达成共识，调用时只会传一个前文所定义的Invocation对象。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">package</span> com.linchen.protocol;<br><br><span class="hljs-keyword">import</span> com.linchen.common.Invocation;<br><span class="hljs-keyword">import</span> com.linchen.register.LocalRegister;<br><span class="hljs-keyword">import</span> org.apache.commons.io.IOUtils;<br><br><span class="hljs-keyword">import</span> javax.servlet.http.HttpServletRequest;<br><span class="hljs-keyword">import</span> javax.servlet.http.HttpServletResponse;<br><span class="hljs-keyword">import</span> java.io.IOException;<br><span class="hljs-keyword">import</span> java.io.ObjectInputStream;<br><span class="hljs-keyword">import</span> java.lang.reflect.InvocationTargetException;<br><span class="hljs-keyword">import</span> java.lang.reflect.Method;<br><br><br><span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">HttpServerHandler</span> &#123;<br>    <span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">handler</span><span class="hljs-params">(HttpServletRequest req, HttpServletResponse resp)</span>&#123;<br>        <span class="hljs-keyword">try</span> &#123;<br>            <span class="hljs-comment">//从request中获得Invocation对象</span><br>            <span class="hljs-type">Invocation</span> <span class="hljs-variable">invocation</span> <span class="hljs-operator">=</span> (Invocation) <span class="hljs-keyword">new</span> <span class="hljs-title class_">ObjectInputStream</span>(req.getInputStream()).readObject();<br>            <span class="hljs-comment">//得到调用的方法名</span><br>            <span class="hljs-type">String</span> <span class="hljs-variable">interfaceName</span> <span class="hljs-operator">=</span> invocation.getInterfaceName();<br>            <span class="hljs-comment">//从本地注册中心得到接口的实现类，本地注册中心的实现会在后文给出</span><br>            <span class="hljs-type">Class</span> <span class="hljs-variable">classImpl</span> <span class="hljs-operator">=</span> LocalRegister.get(interfaceName,<span class="hljs-string">&quot;1.0&quot;</span>);<br>            <span class="hljs-comment">//通过反射得到对应的Method对象</span><br>            <span class="hljs-type">Method</span> <span class="hljs-variable">method</span> <span class="hljs-operator">=</span> classImpl.getMethod(invocation.getMethodName(), invocation.getParameterTypes());<br>            <span class="hljs-comment">//反射调用方法</span><br>            <span class="hljs-type">String</span> <span class="hljs-variable">result</span> <span class="hljs-operator">=</span> (String)method.invoke(classImpl.newInstance(), invocation.getParameters());<br>            <span class="hljs-comment">//将调用结果填入response对象</span><br>            IOUtils.write(result,resp.getOutputStream());<br>        &#125; <span class="hljs-keyword">catch</span> (Exception e) &#123;<br>            e.printStackTrace();<br>        &#125;<br>    &#125;<br>&#125;<br><br></code></pre></td></tr></table></figure>
+
+<h6 id="LocalRegister：接口映射"><a href="#LocalRegister：接口映射" class="headerlink" title="LocalRegister：接口映射"></a>LocalRegister：接口映射</h6><p>本地注册中心，映射接口及其实现类</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">package</span> com.linchen.register;<br><br><span class="hljs-keyword">import</span> java.util.HashMap;<br><span class="hljs-keyword">import</span> java.util.Map;<br><br><span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">LocalRegister</span> &#123;<br>    <span class="hljs-comment">//接口名字映射实现类</span><br>    <span class="hljs-keyword">private</span> <span class="hljs-keyword">static</span> Map&lt;String,Class&gt; map = <span class="hljs-keyword">new</span> <span class="hljs-title class_">HashMap</span>&lt;&gt;();<br><br>    <span class="hljs-comment">//注册接口实现类，version标识相同接口的不同实现方案</span><br>    <span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">register</span><span class="hljs-params">(String interfaceName,String version,Class implClass)</span>&#123;<br>        map.put(interfaceName+version,implClass);<br>    &#125;<br><br>    <span class="hljs-comment">//根据接口与版本号得到对应的实现类</span><br>    <span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> Class <span class="hljs-title function_">get</span><span class="hljs-params">(String interfaceName,String version)</span>&#123;<br>        <span class="hljs-keyword">return</span> map.get(interfaceName+version);<br>    &#125;<br>&#125;<br><br></code></pre></td></tr></table></figure>
+
+<h6 id="MapRemoteRegister-服务注册与发现"><a href="#MapRemoteRegister-服务注册与发现" class="headerlink" title="MapRemoteRegister:服务注册与发现"></a>MapRemoteRegister:服务注册与发现</h6><p>服务端启动时调用：服务注册；消费端请求得到服务端地址：服务发现</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">package</span> com.linchen.register;<br><br><span class="hljs-keyword">import</span> com.linchen.common.URL;<br><br><span class="hljs-keyword">import</span> java.io.*;<br><span class="hljs-keyword">import</span> java.util.ArrayList;<br><span class="hljs-keyword">import</span> java.util.HashMap;<br><span class="hljs-keyword">import</span> java.util.List;<br><span class="hljs-keyword">import</span> java.util.Map;<br><br><span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">MapRemoteRegister</span> &#123;<br>    <span class="hljs-comment">//接口名字映射实现类</span><br>    <span class="hljs-keyword">private</span> <span class="hljs-keyword">static</span> Map&lt;String, List&lt;URL&gt;&gt; map = <span class="hljs-keyword">new</span> <span class="hljs-title class_">HashMap</span>&lt;&gt;();<br><br>    <span class="hljs-comment">//注册接口实现类</span><br>    <span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">register</span><span class="hljs-params">(String interfaceName,URL url)</span>&#123;<br>        List&lt;URL&gt; urls = map.get(interfaceName);<br>        <span class="hljs-keyword">if</span>(urls==<span class="hljs-literal">null</span>)&#123;<br>            urls=<span class="hljs-keyword">new</span> <span class="hljs-title class_">ArrayList</span>&lt;&gt;();<br>        &#125;<br>        urls.add(url);<br>        map.put(interfaceName,urls);<br>        saveFile();<br>    &#125;<br><br>    <span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> List&lt;URL&gt; <span class="hljs-title function_">get</span><span class="hljs-params">(String interfaceName)</span>&#123;<br>        map=getFile();<br>        <span class="hljs-keyword">return</span> map.get(interfaceName);<br>    &#125;<br><br>    <span class="hljs-keyword">private</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">saveFile</span><span class="hljs-params">()</span>&#123;<br>        <span class="hljs-keyword">try</span> &#123;<br>            <span class="hljs-type">ObjectOutputStream</span> <span class="hljs-variable">oos</span> <span class="hljs-operator">=</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">ObjectOutputStream</span>(<span class="hljs-keyword">new</span> <span class="hljs-title class_">FileOutputStream</span>(<span class="hljs-string">&quot;temp.txt&quot;</span>));<br>            oos.writeObject(map);<br>            oos.close();<br>        &#125; <span class="hljs-keyword">catch</span> (IOException e) &#123;<br>            e.printStackTrace();<br>        &#125;<br>    &#125;<br><br>    <span class="hljs-keyword">private</span> <span class="hljs-keyword">static</span> Map&lt;String, List&lt;URL&gt;&gt; <span class="hljs-title function_">getFile</span><span class="hljs-params">()</span>&#123;<br>        <span class="hljs-keyword">try</span> &#123;<br>            Map&lt;String, List&lt;URL&gt;&gt; map2 = <span class="hljs-literal">null</span>;<br>            <span class="hljs-type">ObjectInputStream</span> <span class="hljs-variable">ois</span> <span class="hljs-operator">=</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">ObjectInputStream</span>(<span class="hljs-keyword">new</span> <span class="hljs-title class_">FileInputStream</span>(<span class="hljs-string">&quot;temp.txt&quot;</span>));<br>            map2 = (Map&lt;String, List&lt;URL&gt;&gt;) ois.readObject();<br>            <span class="hljs-keyword">return</span> map2;<br>        &#125; <span class="hljs-keyword">catch</span> (IOException e) &#123;<br>            e.printStackTrace();<br>        &#125; <span class="hljs-keyword">catch</span> (ClassNotFoundException e) &#123;<br>            e.printStackTrace();<br>        &#125;<br>        <span class="hljs-keyword">return</span> <span class="hljs-literal">null</span>;<br>    &#125;<br>&#125;<br><br></code></pre></td></tr></table></figure>
+
+<h6 id="HttpServer：服务启动"><a href="#HttpServer：服务启动" class="headerlink" title="HttpServer：服务启动"></a>HttpServer：服务启动</h6><p>服务提供方启动一个Tomcat服务器</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">package</span> com.linchen.protocol;<br><br><span class="hljs-keyword">import</span> org.apache.catalina.*;<br><span class="hljs-keyword">import</span> org.apache.catalina.connector.Connector;<br><span class="hljs-keyword">import</span> org.apache.catalina.core.StandardContext;<br><span class="hljs-keyword">import</span> org.apache.catalina.core.StandardEngine;<br><span class="hljs-keyword">import</span> org.apache.catalina.core.StandardHost;<br><span class="hljs-keyword">import</span> org.apache.catalina.startup.Tomcat;<br><br><span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">HttpServer</span> &#123;<br>    <span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">start</span><span class="hljs-params">(String hostname,Integer port)</span>&#123;<br>        <span class="hljs-type">Tomcat</span> <span class="hljs-variable">tomcat</span> <span class="hljs-operator">=</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">Tomcat</span>();<br><br>        <span class="hljs-type">Server</span> <span class="hljs-variable">server</span> <span class="hljs-operator">=</span> tomcat.getServer();<br>        <span class="hljs-type">Service</span> <span class="hljs-variable">service</span> <span class="hljs-operator">=</span> server.findService(<span class="hljs-string">&quot;Tomcat&quot;</span>);<br><br>        <span class="hljs-type">Connector</span> <span class="hljs-variable">connector</span> <span class="hljs-operator">=</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">Connector</span>();<br>        connector.setPort(port);<br><br>        <span class="hljs-type">Engine</span> <span class="hljs-variable">engine</span> <span class="hljs-operator">=</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">StandardEngine</span>();<br>        engine.setDefaultHost(hostname);<br><br>        <span class="hljs-type">Host</span> <span class="hljs-variable">host</span> <span class="hljs-operator">=</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">StandardHost</span>();<br>        host.setName(hostname);<br><br>        <span class="hljs-type">String</span> <span class="hljs-variable">contextPath</span> <span class="hljs-operator">=</span> <span class="hljs-string">&quot;&quot;</span>;<br>        <span class="hljs-type">Context</span> <span class="hljs-variable">context</span> <span class="hljs-operator">=</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">StandardContext</span>();<br>        context.setPath(contextPath);<br>        context.addLifecycleListener(<span class="hljs-keyword">new</span> <span class="hljs-title class_">Tomcat</span>.FixContextListener());<br><br>        host.addChild(context);<br>        engine.addChild(host);<br><br>        service.setContainer(engine);<br>        service.addConnector(connector);<br>		<br>        <span class="hljs-comment">//注册我们自定义的servlet容器</span><br>        tomcat.addServlet(contextPath,<span class="hljs-string">&quot;dispatcher&quot;</span>,<span class="hljs-keyword">new</span> <span class="hljs-title class_">DispatcherServlet</span>());<br>        context.addServletMappingDecoded(<span class="hljs-string">&quot;/*&quot;</span>,<span class="hljs-string">&quot;dispatcher&quot;</span>);<br><br>        <span class="hljs-keyword">try</span> &#123;<br>            tomcat.start();<br>            tomcat.getServer().await();<br>        &#125; <span class="hljs-keyword">catch</span> (LifecycleException e) &#123;<br>            e.printStackTrace();<br>        &#125;<br>    &#125;<br>&#125;<br><br></code></pre></td></tr></table></figure>
+
+<h6 id="HttpClient：网络请求"><a href="#HttpClient：网络请求" class="headerlink" title="HttpClient：网络请求"></a>HttpClient：网络请求</h6><p>服务消费端向服务端发起网络请求</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">package</span> com.linchen.protocol;<br><br><span class="hljs-keyword">import</span> com.linchen.common.Invocation;<br><span class="hljs-keyword">import</span> org.apache.commons.io.IOUtils;<br><br><span class="hljs-keyword">import</span> java.io.*;<br><span class="hljs-keyword">import</span> java.net.HttpURLConnection;<br><span class="hljs-keyword">import</span> java.net.MalformedURLException;<br><span class="hljs-keyword">import</span> java.net.URL;<br><br><span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">HttpClient</span> &#123;<br>    <span class="hljs-keyword">public</span> String <span class="hljs-title function_">send</span><span class="hljs-params">(String hostname, Integer port, Invocation invocation)</span> <span class="hljs-keyword">throws</span> Exception&#123;<br>		<br>        <span class="hljs-comment">//主机与端口配置</span><br>        <span class="hljs-type">URL</span> <span class="hljs-variable">url</span> <span class="hljs-operator">=</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">URL</span>(<span class="hljs-string">&quot;http&quot;</span>,hostname,port,<span class="hljs-string">&quot;/&quot;</span>);<br>        <span class="hljs-type">HttpURLConnection</span> <span class="hljs-variable">httpURLConnection</span> <span class="hljs-operator">=</span> (HttpURLConnection) url.openConnection();<br><br>        httpURLConnection.setRequestMethod(<span class="hljs-string">&quot;POST&quot;</span>);<br>        httpURLConnection.setDoOutput(<span class="hljs-literal">true</span>);<br><br>        <span class="hljs-type">OutputStream</span> <span class="hljs-variable">outputStream</span> <span class="hljs-operator">=</span> httpURLConnection.getOutputStream();<br>        <span class="hljs-type">ObjectOutputStream</span> <span class="hljs-variable">oos</span> <span class="hljs-operator">=</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">ObjectOutputStream</span>(outputStream);<br>		<br>        <span class="hljs-comment">//请求体</span><br>        oos.writeObject(invocation);<br>        oos.flush();<br>        oos.close();<br><br>        <span class="hljs-type">InputStream</span> <span class="hljs-variable">inputStream</span> <span class="hljs-operator">=</span> httpURLConnection.getInputStream();<br>        <span class="hljs-type">String</span> <span class="hljs-variable">result</span> <span class="hljs-operator">=</span> IOUtils.toString(inputStream);<br>        <span class="hljs-keyword">return</span> result;<br>    &#125;<br>&#125;<br><br></code></pre></td></tr></table></figure>
+
+<h6 id="ProxyFactory：代理工厂"><a href="#ProxyFactory：代理工厂" class="headerlink" title="ProxyFactory：代理工厂"></a>ProxyFactory：代理工厂</h6><p>服务调用方请求代理工厂以获得目标接口的代理对象，封装了网络请求过程的一些实现细节</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">package</span> com.linchen.proxy;<br><br><span class="hljs-keyword">import</span> com.linchen.common.Invocation;<br><span class="hljs-keyword">import</span> com.linchen.common.URL;<br><span class="hljs-keyword">import</span> com.linchen.loadBalance.LoadBalance;<br><span class="hljs-keyword">import</span> com.linchen.protocol.HttpClient;<br><span class="hljs-keyword">import</span> com.linchen.register.MapRemoteRegister;<br><br><span class="hljs-keyword">import</span> java.lang.reflect.InvocationHandler;<br><span class="hljs-keyword">import</span> java.lang.reflect.Method;<br><span class="hljs-keyword">import</span> java.lang.reflect.Proxy;<br><span class="hljs-keyword">import</span> java.util.List;<br><br><span class="hljs-comment">/**</span><br><span class="hljs-comment"> * <span class="hljs-doctag">@Author</span> 林晨</span><br><span class="hljs-comment"> * <span class="hljs-doctag">@Date</span> 2023-08-06 13:26</span><br><span class="hljs-comment"> * <span class="hljs-doctag">@PackageName</span>:com.linchen.proxy</span><br><span class="hljs-comment"> * <span class="hljs-doctag">@ClassName</span>: ProxyFactory</span><br><span class="hljs-comment"> * <span class="hljs-doctag">@Description</span>: TODO</span><br><span class="hljs-comment"> * <span class="hljs-doctag">@Version</span> 1.0</span><br><span class="hljs-comment"> */</span><br><span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">ProxyFactory</span> &#123;<br>    <span class="hljs-comment">//泛型定义方法</span><br>    <span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> &lt;T&gt; T <span class="hljs-title function_">getProxy</span><span class="hljs-params">(Class interfaceClass)</span>&#123;<br>        <span class="hljs-type">Object</span> <span class="hljs-variable">proxyInstance</span> <span class="hljs-operator">=</span> Proxy.newProxyInstance(interfaceClass.getClassLoader(), <span class="hljs-keyword">new</span> <span class="hljs-title class_">Class</span>[]&#123;interfaceClass&#125;, <span class="hljs-keyword">new</span> <span class="hljs-title class_">InvocationHandler</span>() &#123;<br>            <span class="hljs-meta">@Override</span><br>            <span class="hljs-keyword">public</span> Object <span class="hljs-title function_">invoke</span><span class="hljs-params">(Object proxy, Method method, Object[] args)</span> <span class="hljs-keyword">throws</span> Throwable &#123;<br>                <span class="hljs-comment">//服务提供方尚未开发完成的处理：mock</span><br>                <span class="hljs-comment">//有时候提供方尚未完善，但是消费端的编码仍然需要进行，此时可以配置JVM参数直接返回：</span><br>                <span class="hljs-comment">//-Dmock=return:Service_is_being_developed</span><br>                <span class="hljs-type">String</span> <span class="hljs-variable">mock</span> <span class="hljs-operator">=</span> System.getProperty(<span class="hljs-string">&quot;mock&quot;</span>);<br>                <span class="hljs-keyword">if</span>(mock!=<span class="hljs-literal">null</span> &amp;&amp; mock.startsWith(<span class="hljs-string">&quot;return&quot;</span>))&#123;<br>                    <span class="hljs-type">String</span> <span class="hljs-variable">result</span> <span class="hljs-operator">=</span> mock.replaceAll(<span class="hljs-string">&quot;return:&quot;</span>, <span class="hljs-string">&quot;&quot;</span>);<br>                    <span class="hljs-keyword">return</span> result;<br>                &#125;<br>				<span class="hljs-comment">//将参数封装成Invocation对象</span><br>                <span class="hljs-type">Invocation</span> <span class="hljs-variable">invocation</span> <span class="hljs-operator">=</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">Invocation</span>(interfaceClass.getName(),<br>                        method.getName(), method.getParameterTypes(), args);<br>                <span class="hljs-type">HttpClient</span> <span class="hljs-variable">httpClient</span> <span class="hljs-operator">=</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">HttpClient</span>();<br><br>                <span class="hljs-comment">//服务发现，得到可能的多台服务提供方</span><br>                List&lt;URL&gt; urlList = MapRemoteRegister.get(interfaceClass.getName());<br>                <span class="hljs-comment">//服务调用</span><br>                <span class="hljs-type">String</span> <span class="hljs-variable">result</span> <span class="hljs-operator">=</span> <span class="hljs-literal">null</span>;<br>                <span class="hljs-comment">//调用过程可能存在重试</span><br>                <span class="hljs-type">int</span> <span class="hljs-variable">max</span> <span class="hljs-operator">=</span> <span class="hljs-number">0</span>;<br>                <span class="hljs-keyword">while</span>(max!=<span class="hljs-number">3</span>)&#123;<br>                    <span class="hljs-keyword">try</span>&#123;<br>                        <span class="hljs-comment">//负载均衡</span><br>                        <span class="hljs-type">URL</span> <span class="hljs-variable">url</span> <span class="hljs-operator">=</span> LoadBalance.random(urlList);<br>                        result = httpClient.send(url.getHostname(), url.getPort(), invocation);<br>                        <span class="hljs-keyword">break</span>;<br>                    &#125;<span class="hljs-keyword">catch</span> (Exception e)&#123;<br>                        <span class="hljs-comment">//重试</span><br>                        <span class="hljs-keyword">if</span>(max++ !=<span class="hljs-number">3</span>)&#123;<br>                            System.out.println(<span class="hljs-string">&quot;第&quot;</span>+max+<span class="hljs-string">&quot;次调用失败&quot;</span>);<br>                            <span class="hljs-keyword">continue</span>;<br>                        &#125;<br>                        System.out.println(<span class="hljs-string">&quot;服务调用过程失败&quot;</span>);<br>                    &#125;<br>                &#125;<br>                <span class="hljs-keyword">return</span> result;<br>            &#125;<br>        &#125;);<br>        <span class="hljs-keyword">return</span> (T) proxyInstance;<br>    &#125;<br>&#125;<br><br></code></pre></td></tr></table></figure>
+
+<h5 id="服务提供方："><a href="#服务提供方：" class="headerlink" title="服务提供方："></a>服务提供方：</h5><h6 id="实现接口：两种方案"><a href="#实现接口：两种方案" class="headerlink" title="实现接口：两种方案"></a>实现接口：两种方案</h6><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">package</span> com.linchen;<br><br><span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">HelloServiceImpl</span> <span class="hljs-keyword">implements</span> <span class="hljs-title class_">HelloService</span>&#123;<br>    <span class="hljs-meta">@Override</span><br>    <span class="hljs-keyword">public</span> String <span class="hljs-title function_">sayHello</span><span class="hljs-params">(String name)</span> &#123;<br>        <span class="hljs-keyword">return</span> <span class="hljs-string">&quot;Hello: &quot;</span>+name;<br>    &#125;<br>&#125;<br><br></code></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">package</span> com.linchen;<br><br><br><span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">HelloServiceImpl2</span> <span class="hljs-keyword">implements</span> <span class="hljs-title class_">HelloService</span>&#123;<br>    <span class="hljs-meta">@Override</span><br>    <span class="hljs-keyword">public</span> String <span class="hljs-title function_">sayHello</span><span class="hljs-params">(String name)</span> &#123;<br>        <span class="hljs-keyword">return</span> <span class="hljs-string">&quot;Hello2: &quot;</span>+name;<br>    &#125;<br>&#125;<br><br></code></pre></td></tr></table></figure>
+
+<h6 id="Provider：启动服务"><a href="#Provider：启动服务" class="headerlink" title="Provider：启动服务"></a>Provider：启动服务</h6><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">package</span> com.linchen;<br><br><span class="hljs-keyword">import</span> com.linchen.common.URL;<br><span class="hljs-keyword">import</span> com.linchen.protocol.HttpServer;<br><span class="hljs-keyword">import</span> com.linchen.register.LocalRegister;<br><span class="hljs-keyword">import</span> com.linchen.register.MapRemoteRegister;<br><br><br><span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">Provider</span> &#123;<br>    <span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">main</span><span class="hljs-params">(String[] args)</span> &#123;<br>        <span class="hljs-comment">//本地接口注册</span><br>        LocalRegister.register(HelloService.class.getName(),<span class="hljs-string">&quot;1.0&quot;</span>,HelloServiceImpl.class);<br>        LocalRegister.register(HelloService.class.getName(),<span class="hljs-string">&quot;2.0&quot;</span>,HelloServiceImpl2.class);<br><br>        <span class="hljs-comment">//服务注册</span><br>        <span class="hljs-type">URL</span> <span class="hljs-variable">url</span> <span class="hljs-operator">=</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">URL</span>(<span class="hljs-string">&quot;localhost&quot;</span>,<span class="hljs-number">8080</span>);<br>        MapRemoteRegister.register(HelloService.class.getName(),url);<br><br>        <span class="hljs-type">HttpServer</span> <span class="hljs-variable">httpServer</span> <span class="hljs-operator">=</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">HttpServer</span>();<br>        httpServer.start(<span class="hljs-string">&quot;localhost&quot;</span>,<span class="hljs-number">8080</span>);<br>    &#125;<br>&#125;<br><br></code></pre></td></tr></table></figure>
+
+<p>此时可以启动服务端了</p>
+<h5 id="消费者Consumer："><a href="#消费者Consumer：" class="headerlink" title="消费者Consumer："></a>消费者Consumer：</h5><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">package</span> com.linchen;<br><br><span class="hljs-keyword">import</span> com.linchen.common.Invocation;<br><span class="hljs-keyword">import</span> com.linchen.protocol.HttpClient;<br><span class="hljs-keyword">import</span> com.linchen.proxy.ProxyFactory;<br><br><span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">Consumer</span> &#123;<br>    <span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">main</span><span class="hljs-params">(String[] args)</span> &#123;<br>        <span class="hljs-comment">//调用RPC工厂得到接口的代理对象</span><br>        <span class="hljs-type">HelloService</span> <span class="hljs-variable">helloService</span> <span class="hljs-operator">=</span> ProxyFactory.getProxy(HelloService.class);<br>        <span class="hljs-comment">//使用代理对象调用接口，就像调用本地方法一样</span><br>        <span class="hljs-type">String</span> <span class="hljs-variable">result2</span> <span class="hljs-operator">=</span> helloService.sayHello(<span class="hljs-string">&quot;linchen2&quot;</span>);<br>        System.out.println(result2);<br>    &#125;<br>&#125;<br><br></code></pre></td></tr></table></figure>
+
+<h4 id="测试"><a href="#测试" class="headerlink" title="测试"></a>测试</h4><h6 id="1-服务端配置了消费端未完成的JVM参数："><a href="#1-服务端配置了消费端未完成的JVM参数：" class="headerlink" title="1.服务端配置了消费端未完成的JVM参数："></a>1.服务端配置了消费端未完成的JVM参数：</h6><p>-Dmock=return:Service_is_being_developed</p>
+<p><img src="img/1691385832872.png" srcset="/img/loading.gif" lazyload alt="1691385832872"></p>
+<p>消费端没有真正发起网络请求调用服务，而是直接返回</p>
+<h6 id="2-删掉上述配置，但是不启动服务端"><a href="#2-删掉上述配置，但是不启动服务端" class="headerlink" title="2.删掉上述配置，但是不启动服务端"></a>2.删掉上述配置，但是不启动服务端</h6><p><img src="img/1691385846861.png" srcset="/img/loading.gif" lazyload alt="1691385846861"></p>
+<p>可以看到进入了我们的服务重试部分，配置的最大重试次数是3次，在三次调用失败后，打印的返回结果自然为null</p>
+<h6 id="3-先启动服务端，再启动消费端"><a href="#3-先启动服务端，再启动消费端" class="headerlink" title="3.先启动服务端，再启动消费端"></a>3.先启动服务端，再启动消费端</h6><p><img src="img/1691385862818.png" srcset="/img/loading.gif" lazyload alt="1691385862818"></p>
+<p>服务端成功启动</p>
+<p><img src="img/1691385872964.png" srcset="/img/loading.gif" lazyload alt="1691385872964"></p>
+<h6 id="4-先启动消费端，中途启动服务端"><a href="#4-先启动消费端，中途启动服务端" class="headerlink" title="4.先启动消费端，中途启动服务端"></a>4.先启动消费端，中途启动服务端</h6><p><img src="img/1691385886324.png" srcset="/img/loading.gif" lazyload alt="1691385886324"></p>
+<p>可以看到在五次调用失败后，第六次成功调用并得到返回结果</p>
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/tags/Java%E3%80%81RPC/">#Java、RPC</a>
+      
+    </div>
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>实现简易的RPC框架</div>
+      <div>http://example.com/2023/08/07/实现简易的RPC框架/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>Author</div>
+          <div>linchen</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>Posted on</div>
+          <div>August 7, 2023</div>
+        </div>
+      
+      
+      
+        <div class="license-meta-item">
+          <div>Licensed under</div>
+          <div>
+            
+              
+              
+                <a target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="BY - Attribution">
+                    <i class="iconfont icon-by"></i>
+                  </span>
+                </a>
+              
+            
+          </div>
+        </div>
+      
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/2023/05/31/SpringAOP%E5%BA%94%E7%94%A8/" title="SpringAOP应用">
+                        <span class="hidden-mobile">SpringAOP应用</span>
+                        <span class="visible-mobile">Next</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header">
+    <i class="iconfont icon-list"></i>
+    <span>Table of Contents</span>
+  </p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">Search</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">Keyword</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> 
+    </div>
+  
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.0/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.18.2/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init(Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc));
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://lib.baomitu.com/clipboard.js/2.0.11/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/4.3.1/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">Blog works best with JavaScript enabled</div>
+  </noscript>
+</body>
+</html>
