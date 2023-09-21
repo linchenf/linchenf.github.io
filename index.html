@@ -224,6 +224,46 @@
     <article class="col-12 col-md-12 mx-auto index-info">
       <h1 class="index-header">
         
+        <a href="/2023/09/02/typescript%E5%B8%B8%E7%94%A8%E5%B7%A5%E5%85%B7%E7%B1%BB%E5%9E%8B/" target="_self">
+          typescript常用工具类型
+        </a>
+      </h1>
+
+      
+      <a class="index-excerpt index-excerpt__noimg" href="/2023/09/02/typescript%E5%B8%B8%E7%94%A8%E5%B7%A5%E5%85%B7%E7%B1%BB%E5%9E%8B/" target="_self">
+        <div>
+          PartialPartial 工具类型可以将一个类型的所有属性变为可选的，且该工具类型返回的类型是给定类型的所有子集 12345678910111213141516type Partial&lt;T&gt; = &#123;  [P in keyof T]?: T[P];&#125;;interface Person &#123;  name: string;  age?: number;  we
+        </div>
+      </a>
+
+      <div class="index-btm post-metas">
+        
+          <div class="post-meta mr-3">
+            <i class="iconfont icon-date"></i>
+            <time datetime="2023-09-02 16:05" pubdate>
+              2023-09-02
+            </time>
+          </div>
+        
+        
+        
+          <div class="post-meta">
+            <i class="iconfont icon-tags"></i>
+            
+              <a href="/tags/%E5%89%8D%E7%AB%AF/">#前端</a>
+            
+          </div>
+        
+      </div>
+    </article>
+  </div>
+
+  <div class="row mx-auto index-card">
+    
+    
+    <article class="col-12 col-md-12 mx-auto index-info">
+      <h1 class="index-header">
+        
         <a href="/2023/08/07/%E5%AE%9E%E7%8E%B0%E7%AE%80%E6%98%93%E7%9A%84RPC%E6%A1%86%E6%9E%B6/" target="_self">
           实现简易的RPC框架
         </a>
@@ -272,7 +312,7 @@
       
       <a class="index-excerpt index-excerpt__noimg" href="/2023/06/20/bug%E8%AE%B0%E5%BD%95/" target="_self">
         <div>
-          报错信息JSON parse error: Cannot deserialize value of type java.util.Date from String “2023-06-20”: not a valid representation (error: Failed to parse Date value ‘2023-06-20’: Unparseable date: “2023-06-2
+          Java自动拆箱虽好，但有时总是带来意想不到的bug​        以下两段代码来源于力扣剑指offer第59-II题，第一段代码无法通过，而第二段可以，原因就是测试用例中有数值超过了Integer默认缓存池的大小256，因此对返回的对象直接使用等等号判断会导致值相等而对象不相等，而第二段代码在判等前先将值赋给了一个int变量，此时发生了自动拆箱，因此第二段代码对于值大于256的对象判等仍然返回
         </div>
       </a>
 
